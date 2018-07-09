@@ -1,0 +1,107 @@
+<div class="page">
+    <div class="page__hd">
+        <h1 class="page__title">社区选择</h1>
+    </div>
+    <div class="page__bd">
+
+        <div class="weui-cells weui-cells_form">
+            <div class="weui-cell">
+                <div class="weui-cell__bd">
+                    <input class="weui-input" type="text" id="cUserName" placeholder="请输入姓名" />
+                </div>
+            </div>
+            <div class="weui-cell weui-cell_vcode">
+                <div class="weui-cell__bd">
+                    <input class="weui-input" type="tel" id="commName" placeholder="请输入社区名称" />
+                </div>
+                <div class="weui-cell__ft">
+                    <button class="weui-vcode-btn" onclick="SearchCommunity()">搜索</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="weui-cells__title">搜索结果</div>
+        <div class="weui-cells weui-cells_radio" id="searchContent">
+
+        </div>
+
+
+        <div class="weui-btn-area">
+            <a class="weui-btn weui-btn_primary" href="javascript:" onclick="GetCommunityId()" id="showTooltips">确定</a>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    var curPage = 0;
+    var pageSize = 5;
+    var commId = 0;
+    var cUserName = '';
+    //搜索社区
+    function SearchCommunity() {
+        var commName = $('#commName').val().trim();
+
+        $.get(`https://www.airtu.me/AllWeb/APIS/Community/Community/Community?name=${commName}&curPage=${curPage}&pageSize=${pageSize}`, function (data, state) {
+            data.Data.forEach(element => {
+                AddData(element);
+            });
+            if (data.Count == pageSize) {
+                curPage++;
+                SearchCommunity();
+            } else {
+                curPage = 0;
+            }
+        })
+    }
+
+
+    function Update(id) {
+        $('.commId').attr('isCheck', 'false');
+        $('#x' + id).attr('isCheck', 'true');
+        commId = id;
+    }
+
+    //添加数据到页面
+    function AddData(obj) {
+        var textData = ` <label class="weui-cell weui-check__label" for="x${obj.id}"> \
+                <div class="weui-cell__bd"> \
+                        <div class="weui-media-box weui-media-box_text"> \
+                    <h4 class="weui-media-box__title">${obj.name}</h4> \
+                    <p class="weui-media-box__desc">${obj.address}</p> \
+                </div> \
+                </div> \
+                <div class="weui-cell__ft"> \
+                    <input type="radio" class="weui-check commId" name="radio1" id="x${obj.id}" value="${obj.id}" isCheck="flase" onclick="Update(${obj.id})" /> \
+                    <span class="weui-icon-checked"></span> \
+                </div> \
+            </label>`;
+
+        $('#searchContent').append(textData);
+    }
+
+    //提交注册信息
+    function GetCommunityId() {
+        var $tooltips = $('.js_tooltips');
+        cUserName = $('#cUserName').val()
+      
+        if (cUserName == '' || commId == 0) {
+            $tooltips.text('请输入姓名或选择社区');
+            $tooltips.css('display', 'block');
+            setTimeout(function () {
+                $tooltips.css('display', 'none');
+            }, 2000);
+            return;
+        }
+        $.get(`https://www.airtu.me/AllWeb/AnxiouslyRepairBrother/RepairUser/Add?name=${cUserName}&phone=${phoneNumber}&communityId=${commId}`, function (data, status) {
+            $tooltips.text(data.Info);
+            $tooltips.css('display', 'block');
+            setTimeout(function () {
+                $tooltips.css('display', 'none');
+            }, 2000);
+        })
+    }
+</script>
